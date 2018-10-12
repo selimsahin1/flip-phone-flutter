@@ -48,6 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
         for (int i = 0; i <= list.length; i++) {
           print('${list[i]}');
         }
+        print('${list.length}');
       }
     });
   }
