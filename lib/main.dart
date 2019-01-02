@@ -37,20 +37,85 @@ class _MyHomePageState extends State<MyHomePage> {
   bool verify = true;
   double oldX = -1.0;
   double oldZ = -1.0;
-  bool oc = true;
+  int oc = 0;
+  int tur = 0;
 
   void _incrementCounter() {
     setState(() {
-      if (oc) {
-        oc = false;
+      if (oc == 0) {
+        oc = 1;
         print('açık');
+      } else if (oc == 1) {
+        print('kapali');
+        print('${arraylist.length}');
+        tur = findPeakUtil(arraylist);
+        oc = 2;
+        //arraylist.clear();
       } else {
-        for (int i = 0; i <= list.length; i++) {
-          print('${list[i]}');
-        }
-        print('${list.length}');
+        oc = 0;
+        arraylist.clear();
+        gyrox.clear();
+        gyroy.clear();
       }
     });
+  }
+
+  int findPeakUtil(List<dynamic> array) {
+    if (array == null || array.isEmpty) {
+      return null;
+    }
+
+    int n = array.length;
+
+    int tur = 0;
+    int end = n - 1;
+    int counter = 0;
+    int c = 0;
+
+    //Üst peak elemanları bulma
+    while (2 < end + 1) {
+      if ((array[end - 1] > array[end - 2]) && (array[end - 1] > array[end])) {
+        if (array[end - 1] > 9.9) counter++;
+        end--;
+      } else if (end > 1) {
+        end--;
+      }
+      print('accz ${array[end - 1]}');
+    }
+
+    //Alt peak elemanları bulma
+    end = n - 1;
+    while (2 < end + 1) {
+      if ((array[end - 1] < array[end - 2]) && (array[end - 1] < array[end])) {
+        if (array[end - 1] < -8) c++;
+        end--;
+      } else if (end > 1) {
+        end--;
+      }
+    }
+
+    end = n - 1;
+    while (2 < end + 1) {
+      end--;
+      print('accx ${gyrox[end - 1]}');
+    }
+
+    end = n - 1;
+    while (2 < end + 1) {
+      end--;
+      print('accy ${gyroy[end - 1]}');
+    }
+
+    if (counter > c) {
+      tur = c;
+    } else if (counter == c) {
+      tur = c - 1;
+    } else
+      tur = null;
+    print('$counter');
+    print('$c');
+
+    return tur;
   }
 
   List<double> _accelerometerValues;
@@ -58,7 +123,9 @@ class _MyHomePageState extends State<MyHomePage> {
   List<double> _gyroscopeValues;
   List<StreamSubscription<dynamic>> _streamSubscriptions =
       <StreamSubscription<dynamic>>[];
-  List<dynamic> list = <dynamic>[];
+  List<dynamic> arraylist = <dynamic>[];
+  List<dynamic> gyrox = <dynamic>[];
+  List<dynamic> gyroy = <dynamic>[];
 
   @override
   Widget build(BuildContext context) {
@@ -70,24 +137,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ?.map((double v) => v.toStringAsFixed(1))
         ?.toList();
 
-    double oldX = _accelerometerValues[0];
-
-    if (oldZ == -1) {
-      oldZ = _accelerometerValues[2];
-    }
-
-    if (oldZ - _accelerometerValues[2] < -8 ||
-        oldZ - _accelerometerValues[2] > 8) {
-      verify = true;
-    }
-    if (verify && _accelerometerValues[2] < 10 && _accelerometerValues[2] > 8) {
-      _counter++;
-      verify = false;
-      oldZ = _accelerometerValues[2];
-    }
-
-    if (oc == false) {
-      list.add(_accelerometerValues[2]);
+    if (oc == 0) {
+      gyrox.add(_accelerometerValues[0]);
+      gyroy.add(_accelerometerValues[1]);
+      arraylist.add(_accelerometerValues[2]);
     }
 
     return Scaffold(
@@ -95,43 +148,45 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Sensor Example'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Padding(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('Accelerometer: $accelerometer, $_counter'),
-                ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Padding(
+                child: Wrap(
+                  direction: Axis.horizontal,
+                  children: <Widget>[
+                    Text('ACCX: ${gyrox.toString()} '),
+                  ],
+                ),
+                padding: const EdgeInsets.all(16.0),
               ),
-              padding: const EdgeInsets.all(16.0),
-            ),
-            Padding(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('UserAccelerometer: $userAccelerometer'),
-                ],
+              Padding(
+                child: Wrap(
+                  direction: Axis.horizontal,
+                  children: <Widget>[
+                    Text('ACCY: ${gyroy.toString()}'),
+                  ],
+                ),
+                padding: const EdgeInsets.all(16.0),
               ),
-              padding: const EdgeInsets.all(16.0),
-            ),
-            Padding(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('Gyroscope: $gyroscope'),
-                ],
+              Padding(
+                child: Wrap(
+                  direction: Axis.horizontal,
+                  children: <Widget>[
+                    Text('ACCZ: ${arraylist.toString()}'),
+                  ],
+                ),
+                padding: const EdgeInsets.all(16.0),
               ),
-              padding: const EdgeInsets.all(16.0),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
-        child: new Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }

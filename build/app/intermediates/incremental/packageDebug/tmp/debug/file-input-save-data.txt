@@ -1,5 +1,5 @@
 #Internal package file, do not edit.
-#Fri Oct 12 18:04:34 EET 2018
+#Mon Oct 15 17:21:23 EET 2018
 4.path=lib/armeabi-v7a/libflutter.so
 8.set=NATIVE_RESOURCE
 6.path=flutter_assets/platform_strong.dill
